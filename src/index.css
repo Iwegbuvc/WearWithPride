@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+#root {
+  font-family: "Merriweather", serif;
+  font-style: normal;
+  font-optical-sizing: auto;
+}
