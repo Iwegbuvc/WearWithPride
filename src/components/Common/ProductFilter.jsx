@@ -5,7 +5,7 @@ import Badge from "./Badge";
 function ProductFilter({ filters, handleFilter, categories }) {
   return (
     <div className="bg-white rounded-lg shadow-sm border p-4">
-      <h2 className="text-lg font-extrabold mb-4 text-red-600">Categories</h2>
+      <h2 className="text-xl md:text-2xl font-extrabold mb-4 text-red-600">Categories</h2>
       <div className="grid gap-3">
         {categories && categories.length > 0 && categories.map((cat) => (
           <Fragment key={cat.value}>

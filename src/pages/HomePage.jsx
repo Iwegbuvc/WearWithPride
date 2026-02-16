@@ -44,10 +44,10 @@ const HomePage = () => {
               <HeroSlider />
             </div>
             <div className="w-full flex flex-col items-center text-center px-4 py-8">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 text-red-600 drop-shadow-lg tracking-tight">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-6 text-red-600 drop-shadow-lg tracking-tight">
                 Welcome to <span className="text-black">WearWithPride</span>
               </h2>
-              <p className="text-base sm:text-xl text-gray-700 max-w-2xl mb-6">
+              <p className="text-base md:text-lg text-gray-700 max-w-2xl mb-6">
                 Discover the latest trends in fashion and shop your favorite
                 styles. Elevate your wardrobe with our exclusive collections,
                 curated just for you.

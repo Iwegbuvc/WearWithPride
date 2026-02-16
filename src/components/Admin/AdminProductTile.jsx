@@ -20,7 +20,7 @@ function AdminProductTile({
             />
         </div>
         <CardContent>
-          <h2 className="text-xl font-bold mb-2 mt-2">{product?.title}</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-2 mt-2">{product?.title}</h2>
           <div className="flex justify-between items-center mb-2">
             <span
               className={`$

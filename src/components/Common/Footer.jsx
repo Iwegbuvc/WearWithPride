@@ -19,10 +19,8 @@ const Footer = () => {
           <img
             src={logo}
             alt="Logo"
-            className="h-24 w-24 mb-6 rounded-full shadow-lg object-cover border-2 bg-white"
+            className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 mb-6 rounded-full shadow-lg object-cover border-2 bg-white"
             style={{
-              width: "96px",
-              height: "96px",
               borderRadius: "50%",
               objectFit: "cover",
               borderColor: "#FFD700",
@@ -30,21 +28,21 @@ const Footer = () => {
               borderStyle: "solid",
             }}
           />
-          <h3 className="text-xs sm:text-base lg:text-xl font-extrabold mb-6 text-white">
+              <h3 className="text-xl md:text-2xl font-extrabold mb-6 text-white">
             About Us
           </h3>
-          <p className="text-base sm:text-lg lg:text-xl font-semibold mb-4 text-white tracking-wide">
+          <p className="text-base md:text-lg font-semibold mb-4 text-white tracking-wide">
             Subscribe to our newsletter to get the latest updates and offers.
           </p>
           <form className="flex flex-col sm:flex-row mt-2 w-full">
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 p-3 border border-gray-400 rounded-t-md sm:rounded-l-md sm:rounded-t-none focus:outline-none focus:ring-2 focus:ring-red-600 text-lg lg:text-xl text-white placeholder-white placeholder-opacity-80 mb-2 sm:mb-0"
+              className="flex-1 p-3 border border-gray-400 rounded-t-md sm:rounded-l-md sm:rounded-t-none focus:outline-none focus:ring-2 focus:ring-red-600 text-base lg:text-lg text-white placeholder-white placeholder-opacity-80 mb-2 sm:mb-0"
             />
             <button
               type="submit"
-              className="bg-red-600 text-white px-4 rounded-b-md sm:rounded-r-md sm:rounded-b-none text-lg lg:text-xl font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all cursor-pointer w-full sm:w-auto"
+              className="bg-red-600 text-white px-4 rounded-b-md sm:rounded-r-md sm:rounded-b-none text-base lg:text-lg font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all cursor-pointer w-full sm:w-auto"
             >
               Subscribe
             </button>
@@ -52,14 +50,14 @@ const Footer = () => {
         </div>
         {/* Shop Links */}
         <div className="sm:ml-8 lg:ml-16 mt-8 sm:mt-0">
-          <h3 className="text-2xl lg:text-3xl font-extrabold mb-6 text-white">
+              <h3 className="text-xl md:text-2xl font-extrabold mb-6 text-white">
             Shop
           </h3>
           <ul className="space-y-4">
             <li>
               <Link
                 to="#"
-                className="text-xs sm:text-base lg:text-lg font-semibold hover:no-underline text-white"
+                className="text-xs sm:text-base lg:text-base font-semibold hover:no-underline text-white"
               >
                 Men's tops
               </Link>
@@ -92,7 +90,7 @@ const Footer = () => {
         </div>
         {/* Support Links */}
         <div className="sm:ml-8 lg:ml-16 mt-8 sm:mt-0">
-          <h3 className="text-2xl lg:text-3xl font-extrabold mb-6 text-white">
+              <h3 className="text-xl md:text-2xl font-extrabold mb-6 text-white">
             Support
           </h3>
           <ul className="space-y-4">
@@ -132,7 +130,7 @@ const Footer = () => {
         </div>
         {/* Social & Contact */}
         <div className="sm:ml-8 lg:ml-16 mt-8 sm:mt-0">
-          <h3 className="text-2xl lg:text-3xl font-extrabold mb-6 text-white">
+              <h3 className="text-xl md:text-2xl font-extrabold mb-6 text-white">
             Connect
           </h3>
           <ul className="space-y-4">

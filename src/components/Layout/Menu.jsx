@@ -8,6 +8,7 @@ import logo from "../../assets/logoGold.jpg";
 const menuItems = [
   { name: "Home", path: "/" },
   { name: "Products", path: "/products" },
+  { name: "My Orders", path: "/orders" },
   {
     name: "Category",
     submenu: [
@@ -26,8 +27,8 @@ const Menu = ({ onCartClick }) => {
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white z-50 shadow">
-      <nav className="flex items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 py-3">
-        <div className="flex items-center gap-2 md:gap-4 justify-center">
+      <nav className="flex flex-wrap items-center justify-between px-2 sm:px-4 md:px-8 lg:px-12 py-3 gap-y-2">
+        <div className="flex items-center gap-2 md:gap-4 lg:gap-6 justify-center min-w-0">
           <img
             src={logo}
             alt="Logo"
@@ -39,33 +40,19 @@ const Menu = ({ onCartClick }) => {
               objectFit: "cover",
             }}
           />
-          <span className="font-extrabold text-xl md:text-2xl lg:text-3xl text-black">
+          <span className="font-extrabold text-base md:text-lg lg:text-xl xl:text-2xl text-black">
             WearWithPride
           </span>
         </div>
-        <ul className="hidden sm:flex items-center gap-2 md:gap-4 lg:gap-6 flex-1 justify-center">
-          {/* Hamburger for mobile at right end */}
-          <button
-            className="sm:hidden ml-2 text-black focus:outline-none"
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
-            <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
-              <path
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+        <ul className="hidden lg:flex items-center gap-4 justify-center flex-nowrap min-w-0">
+          {/* Hamburger is handled below for sm/md */}
           {menuItems.map((item) =>
             !item.submenu ? (
               <li key={item.name}>
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `px-2 md:px-3 py-1 rounded transition-colors duration-200 text-black font-bold text-sm md:text-base lg:text-lg no-underline whitespace-nowrap ${
+                    `px-2 md:px-2 py-1 rounded transition-colors duration-200 text-black font-bold text-xs md:text-sm lg:text-base xl:text-lg no-underline whitespace-nowrap ${
                       isActive ? "text-red-600" : "hover:text-red-500"
                     }`
                   }
@@ -77,7 +64,7 @@ const Menu = ({ onCartClick }) => {
             ) : (
               <li className="relative" key={item.name}>
                 <button
-                  className="px-2 md:px-3 py-1 rounded cursor-pointer text-black font-bold text-sm md:text-base lg:text-lg flex items-center hover:text-red-500 focus:outline-none no-underline"
+                  className="px-2 md:px-2 py-1 rounded cursor-pointer text-black font-bold text-xs md:text-sm lg:text-base xl:text-lg flex items-center hover:text-red-500 focus:outline-none no-underline"
                   onClick={() => setCategoryOpen((v) => !v)}
                   aria-expanded={categoryOpen}
                   aria-controls="desktop-category-menu"
@@ -109,7 +96,7 @@ const Menu = ({ onCartClick }) => {
                         <NavLink
                           to={sub.path}
                           className={({ isActive }) =>
-                            `block px-4 md:px-5 py-2 md:py-3 rounded-lg text-black font-bold text-sm md:text-base lg:text-lg bg-gray-50 hover:bg-red-100 hover:text-red-600 shadow-sm transition no-underline ${
+                            `block px-4 md:px-5 py-2 md:py-3 rounded-lg text-black font-bold text-xs md:text-sm lg:text-base xl:text-lg bg-gray-50 hover:bg-red-100 hover:text-red-600 shadow-sm transition no-underline ${
                               isActive
                                 ? "text-red-600 bg-red-50 font-extrabold"
                                 : ""
@@ -129,7 +116,7 @@ const Menu = ({ onCartClick }) => {
           {/* End desktop nav list */}
         </ul>
         {/* Desktop icons */}
-        <div className="hidden sm:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4 min-w-0">
           {/* Search */}
           <div className="relative hidden md:block">
             <input
@@ -139,21 +126,22 @@ const Menu = ({ onCartClick }) => {
             />
             <FiSearch className="absolute right-2 top-2 text-gray-400" />
           </div>
-          <Link to="/login" className="no-underline">
-            <FaUserCircle className="text-2xl text-black hover:text-red-500" />
-          </Link>
+          <div className="relative group">
+            <Link to="/login" className="no-underline">
+              <FaUserCircle className="text-2xl text-black hover:text-red-500" />
+            </Link>
+          </div>
           <button
             onClick={onCartClick}
             className="relative focus:outline-none cursor-pointer"
             aria-label="Open cart drawer"
           >
             <FaShoppingCart className="text-2xl text-black hover:text-red-500" />
-            {/* Optionally add a badge for cart count here */}
           </button>
         </div>
-        {/* Hamburger for mobile at right end */}
+        {/* Hamburger for mobile/tablet at right end */}
         <button
-          className="sm:hidden ml-2 text-black focus:outline-none"
+          className="lg:hidden ml-2 text-black focus:outline-none"
           onClick={() => setMobileOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -168,7 +156,7 @@ const Menu = ({ onCartClick }) => {
         </button>
         {/* Mobile menu */}
         <div
-          className={`fixed inset-0 z-50 sm:hidden transition-opacity duration-300 ${mobileOpen ? 'opacity-100 pointer-events-auto bg-black/40' : 'opacity-0 pointer-events-none'}`}
+          className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${mobileOpen ? 'opacity-100 pointer-events-auto bg-black/40' : 'opacity-0 pointer-events-none'}`}
           onClick={() => setMobileOpen(false)}
         >
           <div
@@ -268,9 +256,6 @@ const Menu = ({ onCartClick }) => {
                   />
                   <FiSearch className="absolute right-2 top-3 text-gray-400" />
                 </div>
-                <Link to="/login" onClick={() => setMobileOpen(false)}>
-                  <FaUserCircle className="text-2xl text-black hover:text-red-500" />
-                </Link>
                 <button
                   onClick={() => {
                     setMobileOpen(false);

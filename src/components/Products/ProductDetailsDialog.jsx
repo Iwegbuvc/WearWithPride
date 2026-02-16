@@ -1,12 +1,19 @@
 import { StarIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "../Common/Avatar";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent, getPublicImagePath, DialogTitle, DialogDescription } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  getPublicImagePath,
+  DialogTitle,
+  DialogDescription,
+} from "../ui/dialog";
 import { Separator } from "../Common/Separator";
 import { Input } from "../ui/input";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, fetchCartItems } from "../../store/shop/cart-slice";
-import { useToast } from "../ui/use-toast";
+import { toast } from "react-toastify";
+import { useCart } from "../../context/CartContext";
 import { setProductDetails } from "../../store/shop/products-slice";
 import { Label } from "../ui/label";
 import StarRatingComponent from "../Common/star-rating";
@@ -14,30 +21,39 @@ import { useEffect, useState } from "react";
 import { addReview, getReviews } from "../../store/shop/review-slice";
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
+  if (!productDetails) return null;
   const [reviewMsg, setReviewMsg] = useState("");
   const [rating, setRating] = useState(0);
   // Mock user and cart
   const user = { id: "mockUser", userName: "Mock User" };
   const [cartItems, setCartItems] = useState([]);
   const [reviews, setReviews] = useState([
-    { _id: "1", userName: "Alice", reviewValue: 5, reviewMessage: "Great product!" },
+    {
+      _id: "1",
+      userName: "Alice",
+      reviewValue: 5,
+      reviewMessage: "Great product!",
+    },
     { _id: "2", userName: "Bob", reviewValue: 4, reviewMessage: "Good value." },
   ]);
-  const toast = ({ title }) => window.alert(title);
+  // Use the cart context for add to cart
+  const { addToCart } = useCart();
 
   function handleRatingChange(getRating) {
     setRating(getRating);
   }
 
-  function handleAddToCart(getCurrentProductId, getTotalStock) {
-    // Simple mock logic
-    const alreadyInCart = cartItems.find(item => item.productId === getCurrentProductId);
-    if (alreadyInCart) {
-      toast({ title: `Already in cart` });
-      return;
-    }
-    setCartItems([...cartItems, { productId: getCurrentProductId, quantity: 1 }]);
-    toast({ title: "Product is added to cart" });
+  function handleAddToCart() {
+    addToCart({
+      id: productDetails._id,
+      name: productDetails.title,
+      price:
+        productDetails.salePrice > 0
+          ? productDetails.salePrice
+          : productDetails.price,
+      image: productDetails.image,
+    });
+    toast.success(`${productDetails.title} added to cart!`);
   }
 
   function handleDialogClose() {
@@ -67,84 +83,144 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
         reviews.length
       : 0;
 
+  // Fallback image logic
+  const fallbackImage = "placeholder.png"; // Place a placeholder.png in public/images
+  const imageSrc = productDetails?.image
+    ? getPublicImagePath(productDetails.image)
+    : getPublicImagePath(fallbackImage);
+
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="flex flex-col md:flex-row gap-8 sm:p-8 max-w-[90vw] sm:max-w-[80vw] lg:max-w-[60vw]">
-        <DialogTitle>{productDetails?.title}</DialogTitle>
-        <DialogDescription>{productDetails?.description}</DialogDescription>
-        {/* Product Image Section */}
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <div className="relative overflow-hidden rounded-lg w-full max-w-xs">
+      <DialogContent className="max-w-xl w-full rounded-2xl shadow-2xl p-0 overflow-hidden bg-white">
+        <DialogTitle>{productDetails?.title || "Product Details"}</DialogTitle>
+        {/* Product Image at Top, always visible */}
+        <div className="flex flex-col items-center justify-center pt-8 pb-4 px-6">
+          <div
+            className="bg-white rounded-2xl shadow-lg border-2 border-gray-100 flex items-center justify-center mb-4"
+            style={{ width: "320px", height: "320px" }}
+          >
             <img
-              src={getPublicImagePath(productDetails?.image)}
-              alt={productDetails?.title}
-              width={400}
-              height={400}
-              className="aspect-square w-full object-cover border"
+              src={imageSrc}
+              alt={productDetails?.title || "Product Image"}
+              className="object-cover w-[350px] h-[350px] rounded-xl border-2 border-gray-300 bg-gray-100"
+              style={{ maxWidth: "100%", maxHeight: "100%" }}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = getPublicImagePath(fallbackImage);
+              }}
             />
           </div>
         </div>
-        {/* Product Details Section */}
-        <div className="flex-1 flex flex-col gap-6">
-          {/* Title & Description (now handled by DialogTitle/Description) */}
-          {/* Price & Sale */}
-          <div className="flex items-center gap-4 mb-2">
-            <span className={`text-xl font-semibold ${productDetails?.salePrice > 0 ? 'line-through text-muted-foreground' : 'text-primary'}`}>${productDetails?.price}</span>
+        {/* Product Details Below Image, not scrollable */}
+        <div className="flex flex-col gap-4 px-2 sm:px-4 md:px-8 pb-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-1 text-gray-900 text-center">
+            {productDetails?.title}
+          </h2>
+          <p className="text-gray-600 text-base md:text-lg mb-2 text-center">
+            {productDetails?.description}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 mb-2">
+            <span className="inline-block px-2 py-1 text-xs bg-gray-200 rounded-full font-medium text-gray-700">
+              {productDetails?.category}
+            </span>
+            {productDetails?.totalStock !== undefined && (
+              <span className="inline-block px-2 py-1 text-xs bg-blue-100 rounded-full font-medium text-blue-700">
+                Stock: {productDetails?.totalStock}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col xs:flex-row items-center justify-center gap-1 sm:gap-3 mb-2 text-center">
+            <span
+              className={`text-xl font-semibold ${productDetails?.salePrice > 0 ? "line-through text-gray-400" : "text-primary"}`}
+            >
+              ₦{productDetails?.price}
+            </span>
             {productDetails?.salePrice > 0 && (
-              <span className="text-xl font-bold text-primary">${productDetails?.salePrice}</span>
+              <span className="text-2xl font-bold text-primary">
+                ₦{productDetails?.salePrice}
+              </span>
             )}
           </div>
-          {/* Star Rating */}
-          <div className="flex items-center gap-2 mb-2">
-            <StarRatingComponent rating={averageReview} />
-            <span className="text-sm text-muted-foreground">({averageReview.toFixed(2)})</span>
+          <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 mb-2">
+            <div className="flex gap-1 px-2 sm:px-3 py-2 rounded-lg">
+              <StarRatingComponent
+                rating={averageReview}
+                size={18}
+                starClassName="text-red-500"
+              />
+            </div>
+            <span className="text-xs text-gray-500">
+              ({averageReview.toFixed(2)})
+            </span>
           </div>
-          {/* Add to Cart Button */}
-          <div className="mb-4">
-            {productDetails?.totalStock === 0 ? (
-              <Button className="w-full opacity-60 cursor-not-allowed">Out of Stock</Button>
-            ) : (
-              <Button className="w-full" onClick={() => handleAddToCart(productDetails?._id, productDetails?.totalStock)}>Add to Cart</Button>
-            )}
-          </div>
-          <Separator />
+          <Button
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg text-lg shadow"
+            onClick={handleAddToCart}
+            disabled={productDetails?.totalStock === 0}
+          >
+            {productDetails?.totalStock === 0 ? "Out of Stock" : "Add to Cart"}
+          </Button>
+          <Separator className="my-2" />
           {/* Reviews Section */}
-          <div className="max-h-[250px] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-3">Reviews</h2>
-            <div className="grid gap-4">
+          <div className="max-h-[220px] overflow-y-auto pr-1 sm:pr-2">
+            <h3 className="text-base font-semibold mb-2">Reviews</h3>
+            <div className="space-y-2">
               {reviews && reviews.length > 0 ? (
                 reviews.map((reviewItem) => (
-                  <div className="flex gap-3 items-start" key={reviewItem._id}>
-                    <Avatar className="w-8 h-8 border">
-                      <AvatarFallback>{reviewItem?.userName[0].toUpperCase()}</AvatarFallback>
+                  <div className="flex flex-col xs:flex-row gap-2 items-start" key={reviewItem._id}>
+                    <Avatar className="w-7 h-7 border">
+                      <AvatarFallback>
+                        {reviewItem?.userName[0].toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-sm">{reviewItem?.userName}</h3>
-                        <StarRatingComponent rating={reviewItem?.reviewValue} />
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-wrap items-center gap-1 px-2 sm:px-3 py-2 rounded-lg">
+                        <span className="font-medium text-xs text-gray-800">
+                          {reviewItem?.userName}
+                        </span>
+                        <StarRatingComponent
+                          key={reviewItem._id + "-stars"}
+                          rating={reviewItem?.reviewValue}
+                          size={14}
+                          starClassName="text-red-500"
+                        />
                       </div>
-                      <p className="text-xs text-muted-foreground">{reviewItem.reviewMessage}</p>
+                      <p className="text-xs text-gray-500">
+                        {reviewItem.reviewMessage}
+                      </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <h1 className="text-sm text-muted-foreground">No Reviews</h1>
+                <span className="text-xs text-gray-400">No Reviews</span>
               )}
             </div>
             {/* Add Review Form */}
-            <div className="mt-6 flex flex-col gap-2">
-              <Label className="text-sm">Write a review</Label>
-              <div className="flex gap-1">
-                <StarRatingComponent rating={rating} handleRatingChange={handleRatingChange} />
+            <div className="mt-4 flex flex-col gap-1">
+              <Label className="text-xs font-medium">Write a review</Label>
+              <div className="flex flex-wrap gap-1 px-2 sm:px-3 py-2 rounded-lg">
+                <StarRatingComponent
+                  rating={rating}
+                  handleRatingChange={handleRatingChange}
+                  size={16}
+                  starClassName="text-red-500"
+                />
               </div>
               <Input
                 name="reviewMsg"
                 value={reviewMsg}
                 onChange={(event) => setReviewMsg(event.target.value)}
                 placeholder="Write a review..."
-                className="text-sm"
+                className="text-xs"
               />
-              <Button onClick={handleAddReview} disabled={reviewMsg.trim() === ""} size="sm">Submit</Button>
+              <Button
+                onClick={handleAddReview}
+                disabled={reviewMsg.trim() === ""}
+                size="sm"
+                className="mt-1 bg-gray-800 hover:bg-gray-900 text-white"
+              >
+                Submit
+              </Button>
             </div>
           </div>
         </div>

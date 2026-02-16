@@ -71,13 +71,13 @@ const NewArrivals = () => {
   const { addToCart } = useCart();
   return (
     <section className="py-12 bg-white">
-      <div className="container mx-auto px-4">
-        <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-8 text-center whitespace-nowrap">
+      <div className="w-full max-w-[1400px] mx-auto px-1 sm:px-4">
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-center whitespace-nowrap">
           <span className="text-red-600 drop-shadow-lg tracking-tight">
-            New{" "}
-          </span>
+            New
+          </span>{" "}
           <span className="text-black drop-shadow-lg tracking-tight">
-            Products
+            Product
           </span>
         </h2>
         <Slider
@@ -97,8 +97,8 @@ const NewArrivals = () => {
           ]}
         >
           {newArrivals.map((item, idx) => (
-            <div key={item.label} className="px-2">
-              <Card className="flex flex-col items-center p-0">
+            <div key={item.label} className="px-1 sm:px-2 w-full">
+              <Card className="flex flex-col items-center p-0 w-full">
                 <div className="relative w-full">
                   <img
                     src={item.image}
@@ -116,7 +116,7 @@ const NewArrivals = () => {
                   ) : null}
                 </div>
                 <CardContent className="p-4 w-full flex flex-col items-center">
-                  <h2 className="text-xl font-bold mb-2 text-center">
+                  <h2 className="text-xl md:text-2xl font-bold mb-2 text-center">
                     {item.label}
                   </h2>
                   <div className="flex flex-col items-center mb-2">
@@ -151,7 +151,8 @@ const NewArrivals = () => {
                         addToCart({
                           id: item.label,
                           name: item.label,
-                          price: item.salePrice > 0 ? item.salePrice : item.price,
+                          price:
+                            item.salePrice > 0 ? item.salePrice : item.price,
                           image: item.image,
                         });
                         toast.success(`${item.label} added to cart!`);

@@ -32,7 +32,7 @@ const HeroSlider = () => {
   }, [page]);
 
   return (
-    <div className="relative overflow-hidden w-full sm:w-[95vw] md:w-[80vw] lg:w-[70vw] xl:w-[60vw] 2xl:w-[55vw] max-w-[1800px] mx-auto rounded-xl shadow-2xl aspect-[16/9] sm:aspect-[16/7] max-h-[40rem] min-h-[180px] sm:min-h-[260px] flex items-center justify-center bg-white">
+    <div className="relative overflow-hidden w-full h-[70vh] min-h-[320px] flex items-center justify-center bg-white rounded-xl shadow-2xl">
       <button
         className="absolute left-1 sm:left-4 z-10 bg-white/80 hover:bg-white text-black rounded-full p-1 sm:p-2 shadow-lg focus:outline-none"
         onClick={() => paginate(-1)}

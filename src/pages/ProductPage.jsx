@@ -67,7 +67,7 @@ const ProductsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 p-6">
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-10 max-w-[1600px] mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1600px] mx-auto">
         {filteredProducts.map((p, idx) => {
           // List of real images from public/images
           const realImages = [
@@ -86,7 +86,7 @@ const ProductsPage = () => {
               handleGetProductDetails={() => {
                 setSelectedProduct({
                   ...p,
-                  image: realImage,
+                  image: realImage, // always set the image field for dialog
                   title: p.name,
                 });
                 setOpenDialog(true);
@@ -100,7 +100,7 @@ const ProductsPage = () => {
         setOpen={setOpenDialog}
         productDetails={selectedProduct}
       />
-      <ScrollToTopButton />
+      {!openDialog && <ScrollToTopButton />}
     </div>
   );
 };

@@ -13,7 +13,7 @@ const BrowseCategories = () => {
   return (
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold mb-8 text-center">
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-8 text-center">
           <span className="text-red-600 drop-shadow-lg tracking-tight">
             Shop by{" "}
           </span>

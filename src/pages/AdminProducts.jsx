@@ -107,6 +107,7 @@ function AdminProducts() {
         {productList && productList.length > 0
           ? productList.map((productItem) => (
               <AdminProductTile
+                key={productItem._id || productItem.id}
                 setFormData={setFormData}
                 setOpenCreateProductsDialog={setOpenCreateProductsDialog}
                 setCurrentEditedId={setCurrentEditedId}
@@ -129,6 +130,18 @@ function AdminProducts() {
           className="overflow-auto p-8 w-[550px] max-w-full flex flex-col items-stretch"
           open={openCreateProductsDialog}
         >
+          {/* Mobile Close Button */}
+          <button
+            className="absolute top-3 right-3 z-20 block md:hidden text-2xl font-extrabold text-gray-700 hover:text-red-600 focus:outline-none"
+            aria-label="Close"
+            onClick={() => {
+              setOpenCreateProductsDialog(false);
+              setCurrentEditedId(null);
+              setFormData(initialFormData);
+            }}
+          >
+            &times;
+          </button>
           <SheetHeader>
             <SheetTitle>
               {currentEditedId !== null ? "Edit Product" : "Add New Product"}
