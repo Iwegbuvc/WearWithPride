@@ -64,7 +64,13 @@ const CartContent = () => {
   };
 
   const handleQuantityChange = (id, delta) => {
-    updateQuantity(id, delta);
+    // Find the current item to get its quantity
+    const item = cartItems.find((i) => (i.id || i._id) === id);
+    if (!item) return;
+    const currentQty = typeof item.quantity === 'number' ? item.quantity : 1;
+    const newQty = currentQty + delta;
+    if (newQty < 1) return; // Prevent going below 1
+    updateQuantity(id, newQty);
   };
 
   return (
@@ -75,63 +81,72 @@ const CartContent = () => {
         </div>
       ) : (
         <ul className="space-y-4">
-          {cartItems.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-center gap-4 bg-gradient-to-r from-yellow-50 via-white to-yellow-100 rounded-xl p-4 shadow border border-yellow-200"
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-16 h-16 object-cover rounded-lg border-2 border-yellow-300 shadow-sm"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1 gap-2">
-                  <span className="font-bold text-gray-900 text-base truncate max-w-[60vw] sm:max-w-full">
-                    {item.name}
-                  </span>
-                  <button
-                    className="flex-shrink-0 ml-2 text-red-500 hover:text-red-700 p-1 rounded-full focus:outline-none"
-                    onClick={() => handleDelete(item.id)}
-                    aria-label="Remove item"
-                  >
-                    <IoMdTrash className="w-5 h-5" />
-                  </button>
+          {cartItems.map((item) => {
+            // Prefer product object if present (populated), fallback to legacy fields
+            const product = item.product || {};
+            const price = typeof item.price === 'number' ? item.price : (typeof product.price === 'number' ? product.price : 0);
+            const quantity = typeof item.quantity === 'number' ? item.quantity : 1;
+            // Prefer selectedImage if present, then item.image, then product.images[0], then placeholder
+            const image = item.selectedImage || item.image || (product.images && product.images[0]?.url) || "/images/placeholder.png";
+            const name = item.name || product.title || product.name || "Product";
+            return (
+              <li
+                key={item.id || item._id}
+                className="flex items-center gap-4 bg-gradient-to-r from-yellow-50 via-white to-yellow-100 rounded-xl p-4 shadow border border-yellow-200"
+              >
+                <img
+                  src={image}
+                  alt={name}
+                  className="w-16 h-16 object-cover rounded-lg border-2 border-yellow-300 shadow-sm"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <span className="font-bold text-gray-900 text-base truncate max-w-[60vw] sm:max-w-full">
+                      {name}
+                    </span>
+                    <button
+                      className="flex-shrink-0 ml-2 text-red-500 hover:text-red-700 p-1 rounded-full focus:outline-none"
+                      onClick={() => handleDelete(item.id || item._id)}
+                      aria-label="Remove item"
+                    >
+                      <IoMdTrash className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <button
+                      className="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 font-bold flex items-center justify-center focus:outline-none text-lg"
+                      onClick={() => handleQuantityChange(item.id || item._id, -1)}
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="text-lg font-bold text-gray-900 w-8 text-center select-none bg-white border border-yellow-300 rounded">
+                      {quantity}
+                    </span>
+                    <button
+                      className="w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 text-green-700 font-bold flex items-center justify-center focus:outline-none text-lg"
+                      onClick={() => handleQuantityChange(item.id || item._id, 1)}
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className="text-sm font-bold text-yellow-700 mt-2">
+                    Unit: ₦
+                    {price.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <button
-                    className="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 font-bold flex items-center justify-center focus:outline-none text-lg"
-                    onClick={() => handleQuantityChange(item.id, -1)}
-                    aria-label="Decrease quantity"
-                  >
-                    -
-                  </button>
-                  <span className="text-lg font-bold text-gray-900 w-8 text-center select-none bg-white border border-yellow-300 rounded">
-                    {item.quantity}
-                  </span>
-                  <button
-                    className="w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 text-green-700 font-bold flex items-center justify-center focus:outline-none text-lg"
-                    onClick={() => handleQuantityChange(item.id, 1)}
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
-                <div className="text-sm font-bold text-yellow-700 mt-2">
-                  Unit: ₦
-                  {item.price.toLocaleString(undefined, {
+                <div className="font-extrabold text-lg text-red-700 ml-2 whitespace-nowrap">
+                  ₦
+                  {(price * quantity).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                   })}
                 </div>
-              </div>
-              <div className="font-extrabold text-lg text-red-700 ml-2 whitespace-nowrap">
-                ₦
-                {(item.price * item.quantity).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
       {cartItems.length > 0 && (
@@ -140,7 +155,7 @@ const CartContent = () => {
             Total:
           </span>
           <span className="text-2xl font-extrabold text-red-700 drop-shadow">
-            ₦{total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            ₦{(typeof total === 'number' ? total : 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
       )}

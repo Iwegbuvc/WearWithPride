@@ -17,6 +17,7 @@ function CommonForm({
   onSubmit,
   buttonText,
   isBtnDisabled,
+  debugBtnClick,
 }) {
   function renderInputsByComponentType(getControlItem) {
     let element = null;
@@ -118,7 +119,12 @@ function CommonForm({
           </div>
         ))}
       </div>
-      <Button disabled={isBtnDisabled} type="submit" className="mt-4 w-full py-3 text-base font-bold bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all duration-200">
+      <Button
+        disabled={isBtnDisabled}
+        type="submit"
+        className="mt-4 w-full py-3 text-base font-bold bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all duration-200"
+        onClick={debugBtnClick}
+      >
         {buttonText || "Submit"}
       </Button>
     </form>

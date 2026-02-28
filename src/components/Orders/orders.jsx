@@ -12,6 +12,7 @@ import {
 } from "../ui/table";
 import ShoppingOrderDetailsView from "./order-details";
 import { useDispatch, useSelector } from "react-redux";
+import { useAuth } from "../../context/AuthContext";
 import {
   getAllOrdersByUserId,
   getOrderDetails,
@@ -23,71 +24,22 @@ import { Badge } from "../ui/badge";
 function ShoppingOrders() {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
-  const authState = useSelector((state) => state.auth) || {};
-  const user = authState.user || { id: 'dummyUser', userName: 'John Doe' };
 
-  // Dummy orders data
-  const dummyOrders = [
-    {
-      _id: 'ORD001',
-      orderDate: '2026-02-10T12:00:00Z',
-      orderStatus: 'confirmed',
-      totalAmount: 120.50,
-      cartItems: [
-        { title: 'T-shirt', quantity: 2, price: 20 },
-        { title: 'Shorts', quantity: 1, price: 30 }
-      ],
-      paymentMethod: 'Credit Card',
-      paymentStatus: 'Paid',
-      addressInfo: {
-        address: '123 Main St',
-        city: 'Lagos',
-        pincode: '100001',
-        phone: '08012345678',
-        notes: 'Leave at the door'
-      }
-    },
-    {
-      _id: 'ORD002',
-      orderDate: '2026-02-12T15:30:00Z',
-      orderStatus: 'rejected',
-      totalAmount: 75.00,
-      cartItems: [
-        { title: 'Shoes', quantity: 1, price: 75 }
-      ],
-      paymentMethod: 'PayPal',
-      paymentStatus: 'Refunded',
-      addressInfo: {
-        address: '456 Side Rd',
-        city: 'Abuja',
-        pincode: '900001',
-        phone: '08087654321',
-        notes: ''
-      }
-    },
-    {
-      _id: 'ORD003',
-      orderDate: '2026-02-14T09:45:00Z',
-      orderStatus: 'pending',
-      totalAmount: 200.00,
-      cartItems: [
-        { title: 'Combo Pack', quantity: 1, price: 200 }
-      ],
-      paymentMethod: 'Bank Transfer',
-      paymentStatus: 'Pending',
-      addressInfo: {
-        address: '789 Market Ave',
-        city: 'Port Harcourt',
-        pincode: '500001',
-        phone: '08011223344',
-        notes: 'Call on arrival'
-      }
-    }
-  ];
-
-  // Use dummy orders for display
-  const orderList = dummyOrders;
+  const dispatch = useDispatch();
+  const { user } = useAuth();
+  const orderList = useSelector((state) => state.shoppingOrderSlice.orderList);
   const orderDetails = selectedOrderDetails;
+
+  useEffect(() => {
+    // console.log('User from AuthContext:', user);
+    if (user && user.token) {
+      // console.log('Dispatching getAllOrdersByUserId with token:', user.token);
+      dispatch(getAllOrdersByUserId(user.token));
+    } else {
+      // console.warn('No user or user.token found, not dispatching order fetch.');
+    }
+  }, [dispatch, user]);
+
 
   function handleFetchOrderDetails(getId) {
     const foundOrder = orderList.find(order => order._id === getId);
@@ -118,23 +70,23 @@ function ShoppingOrders() {
               ? orderList.map((orderItem) => (
                   <TableRow key={orderItem._id}>
                     <TableCell>{orderItem?._id}</TableCell>
-                    <TableCell>{orderItem?.orderDate.split("T")[0]}</TableCell>
+                    <TableCell>{(orderItem?.createdAt || orderItem?.orderDate || '').split("T")[0]}</TableCell>
                     <TableCell>
                       <Badge
                         className={`py-1 px-3 ${
-                          orderItem?.orderStatus === "confirmed"
+                          orderItem?.orderStatus === "confirmed" || orderItem?.paymentStatus === "paid"
                             ? "bg-green-500"
-                            : orderItem?.orderStatus === "rejected"
+                            : orderItem?.orderStatus === "rejected" || orderItem?.paymentStatus === "failed"
                             ? "bg-red-600"
-                            : orderItem?.orderStatus === "pending"
+                            : orderItem?.orderStatus === "pending" || orderItem?.paymentStatus === "pending"
                             ? "bg-yellow-400 text-black"
                             : "bg-black"
                         }`}
                       >
-                        {orderItem?.orderStatus}
+                        {orderItem?.orderStatus || orderItem?.paymentStatus || "-"}
                       </Badge>
                     </TableCell>
-                    <TableCell>₦{orderItem?.totalAmount}</TableCell>
+                    <TableCell>₦{orderItem?.totalAmount || orderItem?.totalPrice}</TableCell>
                     <TableCell>
                       <Dialog
                         open={openDetailsDialog && orderDetails?._id === orderItem._id}

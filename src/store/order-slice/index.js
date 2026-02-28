@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import API from "../../api/api";
 
 const initialState = {
   orderList: [],
@@ -9,35 +9,23 @@ const initialState = {
 export const getAllOrdersForAdmin = createAsyncThunk(
   "/order/getAllOrdersForAdmin",
   async () => {
-    const response = await axios.get(
-      `http://localhost:5000/api/admin/orders/get`
-    );
-
+    // Fetch all orders by setting a high limit
+    const response = await API.get(`/admin/orders?limit=1000`);
     return response.data;
   }
 );
 
-export const getOrderDetailsForAdmin = createAsyncThunk(
-  "/order/getOrderDetailsForAdmin",
-  async (id) => {
-    const response = await axios.get(
-      `http://localhost:5000/api/admin/orders/details/${id}`
-    );
-
-    return response.data;
-  }
-);
+// You need to add a backend route for this if you want to fetch a single order by ID
+// You do not have a backend route for GET /api/admin/orders/:id in your admin router.
+// If you want to fetch a single order by ID for admin, you must add this route to your backend.
+// For now, this thunk will not work unless you add that route.
 
 export const updateOrderStatus = createAsyncThunk(
   "/order/updateOrderStatus",
   async ({ id, orderStatus }) => {
-    const response = await axios.put(
-      `http://localhost:5000/api/admin/orders/update/${id}`,
-      {
-        orderStatus,
-      }
-    );
-
+    const response = await API.patch(`/admin/orders/${id}/status`, {
+      status: orderStatus,
+    });
     return response.data;
   }
 );
@@ -47,7 +35,7 @@ const adminOrderSlice = createSlice({
   initialState,
   reducers: {
     resetOrderDetails: (state) => {
-      console.log("resetOrderDetails");
+      // console.log("resetOrderDetails");
 
       state.orderDetails = null;
     },
@@ -59,23 +47,13 @@ const adminOrderSlice = createSlice({
       })
       .addCase(getAllOrdersForAdmin.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.orderList = action.payload.data;
+        state.orderList = action.payload.orders;
       })
       .addCase(getAllOrdersForAdmin.rejected, (state) => {
         state.isLoading = false;
         state.orderList = [];
       })
-      .addCase(getOrderDetailsForAdmin.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(getOrderDetailsForAdmin.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.orderDetails = action.payload.data;
-      })
-      .addCase(getOrderDetailsForAdmin.rejected, (state) => {
-        state.isLoading = false;
-        state.orderDetails = null;
-      });
+      // Removed getOrderDetailsForAdmin cases because the thunk is not defined
   },
 });
 

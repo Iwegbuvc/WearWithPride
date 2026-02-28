@@ -1,4 +1,5 @@
 import ProductImageUpload from "../components/Admin/image-upload";
+import { toast } from "../components/ui/use-toast";
 import AdminProductTile from "../components/Admin/AdminProductTile";
 import CommonForm from "../components/Common/form";
 import { Button } from "../components/ui/button";
@@ -16,14 +17,16 @@ import {
   fetchAllProducts,
 } from "../store/admin/products-slice";
 import { Fragment, useEffect, useState } from "react";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+// Remove Select import, we'll use checkboxes for multi-select
 import { useDispatch, useSelector } from "react-redux";
 
 const initialFormData = {
-  image: null,
+  images: [],
   title: "",
   description: "",
   category: "",
-  brand: "",
   price: "",
   salePrice: "",
   totalStock: "",
@@ -31,50 +34,98 @@ const initialFormData = {
 };
 
 function AdminProducts() {
-  const [openCreateProductsDialog, setOpenCreateProductsDialog] =
-    useState(false);
+  const [openCreateProductsDialog, setOpenCreateProductsDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
-  const [imageFile, setImageFile] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [imageFiles, setImageFiles] = useState([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+  const [sizesText, setSizesText] = useState("");
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const { productList } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault();
+    // ...
+      setIsUploading(true);
 
-    currentEditedId !== null
-      ? dispatch(
-          editProduct({
-            id: currentEditedId,
-            formData,
-          }),
-        ).then((data) => {
-          if (data?.payload?.success) {
-            dispatch(fetchAllProducts());
-            setFormData(initialFormData);
-            setOpenCreateProductsDialog(false);
-            setCurrentEditedId(null);
-          }
-        })
-      : dispatch(
-          addNewProduct({
-            ...formData,
-            image: uploadedImageUrl,
-          }),
-        ).then((data) => {
-          if (data?.payload?.success) {
-            dispatch(fetchAllProducts());
-            setOpenCreateProductsDialog(false);
-            setImageFile(null);
-            setFormData(initialFormData);
-            toast({
-              title: "Product add successfully",
-            });
-          }
+    // Combine sizes from both input methods
+    let sizesArr = [];
+    if (sizesText) {
+      sizesArr = sizesText.split(",").map(s => s.trim()).filter(Boolean);
+    }
+    if (selectedSizes.length > 0) {
+      sizesArr = Array.from(new Set([...sizesArr, ...selectedSizes]));
+    }
+
+    // Prepare FormData for backend
+    const data = new FormData();
+    data.append("name", formData.title);
+    data.append("description", formData.description);
+    data.append("category", formData.category);
+    data.append("price", formData.price);
+    data.append("salePrice", formData.salePrice);
+    data.append("totalStock", formData.totalStock);
+    data.append("averageReview", formData.averageReview);
+    sizesArr.forEach(size => data.append("sizes", size));
+    imageFiles.forEach(file => data.append("images", file));
+
+    try {
+      const API = (await import("../api/api")).default;
+      let response;
+      if (currentEditedId) {
+        // Edit mode: update product
+        response = await API.put(`/admin/updateProduct/${currentEditedId}`, data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
+        // ...
+        if (response?.data) {
+          dispatch(fetchAllProducts());
+          setOpenCreateProductsDialog(false);
+          setImageFiles([]);
+          setFormData(initialFormData);
+          setSizesText("");
+          setSelectedSizes([]);
+          setCurrentEditedId(null);
+          toast({
+            title: "Product updated successfully",
+          });
+            setIsUploading(false);
+        }
+      } else {
+        // Add mode: create product
+        response = await API.post("/admin/createProduct", data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        // ...
+        if (response?.data) {
+          dispatch(fetchAllProducts());
+          setOpenCreateProductsDialog(false);
+          setImageFiles([]);
+          setFormData(initialFormData);
+          setSizesText("");
+          setSelectedSizes([]);
+          toast({
+            title: "Product add successfully",
+          });
+            setIsUploading(false);
+        }
+      }
+    } catch (err) {
+      // ...
+      toast({
+        title: "Failed to save product",
+        variant: "destructive",
+      });
+        setIsUploading(false);
+    }
   }
 
   function handleDelete(getCurrentProductId) {
@@ -86,10 +137,13 @@ function AdminProducts() {
   }
 
   function isFormValid() {
-    return Object.keys(formData)
-      .filter((currentKey) => currentKey !== "averageReview")
-      .map((key) => formData[key] !== "")
-      .every((item) => item);
+    // Only require fields that backend expects and are truly required
+    const requiredFields = ["title", "description", "category", "price", "totalStock"];
+    const hasAllFields = requiredFields.map((key) => formData[key] !== "").every((item) => item);
+    const hasImages = imageFiles.length > 0;
+    const valid = hasAllFields && hasImages;
+    // ...
+    return valid;
   }
 
   useEffect(() => {
@@ -111,6 +165,7 @@ function AdminProducts() {
                 setFormData={setFormData}
                 setOpenCreateProductsDialog={setOpenCreateProductsDialog}
                 setCurrentEditedId={setCurrentEditedId}
+                setImageFiles={setImageFiles}
                 product={productItem}
                 handleDelete={handleDelete}
               />
@@ -148,23 +203,53 @@ function AdminProducts() {
             </SheetTitle>
           </SheetHeader>
           <ProductImageUpload
-            imageFile={imageFile}
-            setImageFile={setImageFile}
-            uploadedImageUrl={uploadedImageUrl}
-            setUploadedImageUrl={setUploadedImageUrl}
-            setImageLoadingState={setImageLoadingState}
-            imageLoadingState={imageLoadingState}
+            imageFiles={imageFiles}
+            setImageFiles={setImageFiles}
             isEditMode={currentEditedId !== null}
           />
           <div className="py-6">
-            <CommonForm
-              onSubmit={onSubmit}
-              formData={formData}
-              setFormData={setFormData}
-              buttonText={currentEditedId !== null ? "Edit" : "Add"}
-              formControls={addProductFormElements}
-              isBtnDisabled={!isFormValid()}
-            />
+              <CommonForm
+                onSubmit={onSubmit}
+                formData={formData}
+                setFormData={setFormData}
+                buttonText={isUploading ? "Uploading..." : (currentEditedId !== null ? "Edit" : "Add")}
+                formControls={addProductFormElements}
+                isBtnDisabled={!isFormValid() || isUploading}
+                debugBtnClick={(e) => {
+                  // console.log("Button clicked, disabled:", !isFormValid());
+                }}
+              />
+            {/* Sizes Section */}
+            <div className="mt-4">
+              <Label htmlFor="sizes-text">Sizes (comma-separated or select below)</Label>
+              <Input
+                id="sizes-text"
+                placeholder="e.g. S,M,L,XL,XXL or 38,40,42"
+                value={sizesText}
+                onChange={e => setSizesText(e.target.value)}
+                className="mb-2"
+              />
+              <Label>Quick Select Sizes</Label>
+              <div className="flex flex-wrap gap-3 mb-2">
+                {['S','M','L','XL','XXL','38','40','42','44','46'].map(size => (
+                  <label key={size} className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      value={size}
+                      checked={selectedSizes.includes(size)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setSelectedSizes(prev => [...prev, size]);
+                        } else {
+                          setSelectedSizes(prev => prev.filter(s => s !== size));
+                        }
+                      }}
+                    />
+                    {size}
+                  </label>
+                ))}
+              </div>
+            </div>
           </div>
         </SheetContent>
       </Sheet>

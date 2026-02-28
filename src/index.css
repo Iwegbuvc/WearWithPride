@@ -1,7 +1,30 @@
+#ProductPage-animate {
+  animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @import "tailwindcss";
 
 #root {
-  font-family: "Merriweather", serif;
+  font-family: "Inter", "Poppins", Arial, sans-serif;
   font-style: normal;
   font-optical-sizing: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Poppins", Arial, sans-serif;
 }

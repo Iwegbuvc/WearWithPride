@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const initialState = {
   approvalURL: null,
   isLoading: false,
@@ -13,7 +15,7 @@ export const createNewOrder = createAsyncThunk(
   "/order/createNewOrder",
   async (orderData) => {
     const response = await axios.post(
-      "http://localhost:5000/api/shop/order/create",
+      `${BASE_URL}/api/shop/order/create`,
       orderData
     );
 
@@ -25,7 +27,7 @@ export const capturePayment = createAsyncThunk(
   "/order/capturePayment",
   async ({ paymentId, payerId, orderId }) => {
     const response = await axios.post(
-      "http://localhost:5000/api/shop/order/capture",
+      `${BASE_URL}/api/shop/order/capture`,
       {
         paymentId,
         payerId,
@@ -39,11 +41,15 @@ export const capturePayment = createAsyncThunk(
 
 export const getAllOrdersByUserId = createAsyncThunk(
   "/order/getAllOrdersByUserId",
-  async (userId) => {
+  async (token) => {
     const response = await axios.get(
-      `http://localhost:5000/api/shop/order/list/${userId}`
+      `${BASE_URL}/api/orders/my-orders`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-
     return response.data;
   }
 );
@@ -52,9 +58,8 @@ export const getOrderDetails = createAsyncThunk(
   "/order/getOrderDetails",
   async (id) => {
     const response = await axios.get(
-      `http://localhost:5000/api/shop/order/details/${id}`
+      `${BASE_URL}/api/orders/${id}`
     );
-
     return response.data;
   }
 );
@@ -91,7 +96,7 @@ const shoppingOrderSlice = createSlice({
       })
       .addCase(getAllOrdersByUserId.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.orderList = action.payload.data;
+        state.orderList = action.payload;
       })
       .addCase(getAllOrdersByUserId.rejected, (state) => {
         state.isLoading = false;

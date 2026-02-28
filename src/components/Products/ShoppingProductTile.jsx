@@ -16,11 +16,13 @@ function ShoppingProductTile({
     <Card className="w-full max-w-sm mx-auto">
       <div onClick={() => handleGetProductDetails(product?._id)}>
         <div className="relative">
-          <img
-            src={getPublicImagePath(product?.image)}
-            alt={product?.title}
-            className="w-full h-[300px] object-cover rounded-t-lg"
-          />
+          {product?.images && product.images.length > 0 && product.images[0].url ? (
+            <img
+              src={product.images[0].url}
+              alt={product?.title}
+              className="w-full h-[300px] object-cover rounded-t-lg"
+            />
+          ) : null}
           {product?.totalStock === 0 ? (
             <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600">
               Out Of Stock

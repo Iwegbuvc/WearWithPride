@@ -8,24 +8,18 @@ import axios from "axios";
 import { Skeleton } from "../ui/skeleton";
 
 function ProductImageUpload({
-  imageFile,
-  setImageFile,
-  imageLoadingState,
-  uploadedImageUrl,
-  setUploadedImageUrl,
-  setImageLoadingState,
+  imageFiles,
+  setImageFiles,
+  uploadedImageUrls,
+  setUploadedImageUrls,
   isEditMode,
   isCustomStyling = false,
 }) {
   const inputRef = useRef(null);
 
-
   function handleImageFileChange(event) {
-    console.log(event.target.files, "event.target.files");
-    const selectedFile = event.target.files?.[0];
-    console.log(selectedFile);
-
-    if (selectedFile) setImageFile(selectedFile);
+    const files = Array.from(event.target.files);
+    setImageFiles(files);
   }
 
   function handleDragOver(event) {
@@ -34,54 +28,47 @@ function ProductImageUpload({
 
   function handleDrop(event) {
     event.preventDefault();
-    const droppedFile = event.dataTransfer.files?.[0];
-    if (droppedFile) setImageFile(droppedFile);
+    const droppedFiles = Array.from(event.dataTransfer.files);
+    if (droppedFiles.length > 0) setImageFiles(droppedFiles);
   }
 
-  function handleRemoveImage() {
-    setImageFile(null);
+  function handleRemoveImage(index) {
+    const newFiles = imageFiles.filter((_, i) => i !== index);
+    setImageFiles(newFiles);
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-  }
-
-  async function uploadImageToCloudinary() {
-    setImageLoadingState(true);
-    const data = new FormData();
-    data.append("my_file", imageFile);
-    // Only upload if backend URL is set, otherwise just show local preview
-    const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL || "";
-    if (!UPLOAD_URL) {
-      setImageLoadingState(false);
-      return;
-    }
-    try {
-      const response = await axios.post(UPLOAD_URL, data);
-      if (response?.data?.success) {
-        setUploadedImageUrl(response.data.result.url);
-      }
-    } catch (err) {
-      // Optionally show a user-friendly error
-    } finally {
-      setImageLoadingState(false);
+    if (uploadedImageUrls) {
+      const newUrls = uploadedImageUrls.filter((_, i) => i !== index);
+      setUploadedImageUrls(newUrls);
     }
   }
 
-  useEffect(() => {
-    if (imageFile !== null) uploadImageToCloudinary();
-  }, [imageFile]);
+  // Removed uploadImagesToServer and image loading state logic
+
+  // Removed effect for uploading images to server
 
   // Local preview for selected file
-  const [localPreview, setLocalPreview] = React.useState(null);
+  const [localPreviews, setLocalPreviews] = React.useState([]);
   React.useEffect(() => {
-    if (imageFile && typeof imageFile !== "string") {
-      const url = URL.createObjectURL(imageFile);
-      setLocalPreview(url);
-      return () => URL.revokeObjectURL(url);
+    if (imageFiles && imageFiles.length > 0) {
+      const urls = imageFiles.map((file) => {
+        if (typeof file === "string") {
+          return file;
+        } else if (file && typeof file === "object" && file.url) {
+          return file.url;
+        } else if (file instanceof File) {
+          return URL.createObjectURL(file);
+        } else {
+          return null;
+        }
+      });
+      setLocalPreviews(urls);
+      return () => urls.forEach((url) => url && url.startsWith("blob:") && URL.revokeObjectURL(url));
     } else {
-      setLocalPreview(null);
+      setLocalPreviews([]);
     }
-  }, [imageFile]);
+  }, [imageFiles]);
 
   return (
     <div className={`w-full mt-4 ${isCustomStyling ? "" : "max-w-md mx-auto"}`}>
@@ -98,34 +85,30 @@ function ProductImageUpload({
           ref={inputRef}
           onChange={handleImageFileChange}
           disabled={isEditMode}
+          multiple
         />
-        {imageLoadingState ? (
-          <Skeleton className="h-10 bg-gray-100" />
-        ) : uploadedImageUrl ? (
-          <div className="flex flex-col items-center gap-2">
-            <img src={uploadedImageUrl} alt="Uploaded" className="max-h-40 rounded-md object-contain" />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={handleRemoveImage}
-            >
-              <XIcon className="w-4 h-4" />
-              <span className="sr-only">Remove File</span>
-            </Button>
-          </div>
-        ) : localPreview ? (
-          <div className="flex flex-col items-center gap-2">
-            <img src={localPreview} alt="Preview" className="max-h-40 rounded-md object-contain" />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={handleRemoveImage}
-            >
-              <XIcon className="w-4 h-4" />
-              <span className="sr-only">Remove File</span>
-            </Button>
+        {imageFiles && imageFiles.length > 0 ? (
+          <div className="flex flex-wrap gap-4 justify-center">
+            {localPreviews.map((url, idx) => (
+              <div key={idx} className="flex flex-col items-center gap-2">
+                {url && (
+                  <img
+                    src={url}
+                    alt={`Preview ${idx + 1}`}
+                    className="max-h-40 rounded-md object-contain"
+                  />
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => handleRemoveImage(idx)}
+                >
+                  <XIcon className="w-4 h-4" />
+                  <span className="sr-only">Remove File</span>
+                </Button>
+              </div>
+            ))}
           </div>
         ) : (
           <Label
@@ -133,7 +116,7 @@ function ProductImageUpload({
             className={`${isEditMode ? "cursor-not-allowed" : ""} flex flex-col items-center justify-center h-32 cursor-pointer`}
           >
             <UploadCloudIcon className="w-10 h-10 text-muted-foreground mb-2" />
-            <span>Drag & drop or click to upload image</span>
+            <span>Drag & drop or click to upload images</span>
           </Label>
         )}
       </div>

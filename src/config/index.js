@@ -18,27 +18,12 @@ export const addProductFormElements = [
     componentType: "select",
     options: [
       { id: "combo", label: "Combo" },
-      { id: "shorts-trousers", label: "Shorts/Trousers" },
+      { id: "trousers/shorts", label: "Shorts/Trousers" },
       { id: "shirts", label: "Shirts" },
       { id: "accessories", label: "Accessories" },
       { id: "shoes", label: "Shoes" },
     ],
   },
-  //   {
-  //     label: "Brand",
-  //     name: "brand",
-  //     componentType: "select",
-  //     options: [
-  //       { id: "wearwithpride", label: "WearWithPride" },
-  //       { id: "nike", label: "Nike" },
-  //       { id: "adidas", label: "Adidas" },
-  //       { id: "puma", label: "Puma" },
-  //       { id: "zara", label: "Zara" },
-  //       { id: "h&m", label: "H&M" },
-  //       { id: "uniqlo", label: "Uniqlo" },
-  //       { id: "other", label: "Other" },
-  //     ],
-  //   },
   {
     label: "Price (₦)",
     name: "price",

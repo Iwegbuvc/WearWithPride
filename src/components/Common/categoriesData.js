@@ -15,7 +15,7 @@ export const categoriesWithIcon = [
   },
   {
     label: "Shorts/Trousers",
-    value: "shorts-trousers",
+    value: "trousers-shorts",
     icon: FaGripHorizontal,
   },
   {

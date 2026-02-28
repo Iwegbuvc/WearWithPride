@@ -1,58 +1,88 @@
-// Mock Redux slice for admin products (UI only)
-export const addNewProduct = (data) => async (dispatch) => ({
-  payload: { success: true },
-});
-export const deleteProduct = (id) => async (dispatch) => ({
-  payload: { success: true },
-});
-export const editProduct = (data) => async (dispatch) => ({
-  payload: { success: true },
-});
-export const fetchAllProducts = () => async (dispatch) => ({
-  type: "FETCH_ALL_PRODUCTS",
-  payload: [],
-});
 
-// Optionally, you can add a mock reducer and initial state if needed for selectors
-const demoProducts = [
-  {
-    _id: "1",
-    image: "/images/product_1.png",
-    title: "Demo Product 1",
-    price: 29000,
-    salePrice: 19000,
-  },
-  {
-    _id: "2",
-    image: "/images/product_2.png",
-    title: "Demo Product 2",
-    price: 49999,
-    salePrice: 0,
-  },
-  {
-    _id: "3",
-    image: "/images/product_3.png",
-    title: "Demo Product 3",
-    price: 15000,
-    salePrice: 12000,
-  },
-  {
-    _id: "4",
-    image: "/images/product_4.png",
-    title: "Demo Product 4",
-    price: 35000,
-    salePrice: 0,
-  },
-  {
-    _id: "5",
-    image: "/images/product_5.png",
-    title: "Demo Product 5",
-    price: 22000,
-    salePrice: 18000,
-  },
-];
+import {
+  createProduct,
+  updateProduct,
+  deleteProductApi,
+  fetchProducts,
+} from "../../api/products";
+
+// Add new product (with image upload)
+export const addNewProduct = (formData) => async (dispatch) => {
+  try {
+    // Convert plain object to FormData
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "image" && value) {
+        // Single image or array
+        if (Array.isArray(value)) {
+          value.forEach((file) => data.append("images", file));
+        } else {
+          data.append("images", value);
+        }
+      } else if (value !== undefined && value !== null) {
+        data.append(key, value);
+      }
+    });
+    const res = await createProduct(data);
+    return { payload: { success: true, product: res.data } };
+  } catch (error) {
+    return { payload: { success: false, error: error?.response?.data?.message || error.message } };
+  }
+};
+
+// Edit product (with image upload)
+export const editProduct = ({ id, formData }) => async (dispatch) => {
+  try {
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "image" && value) {
+        if (Array.isArray(value)) {
+          value.forEach((file) => data.append("images", file));
+        } else {
+          data.append("images", value);
+        }
+      } else if (value !== undefined && value !== null) {
+        data.append(key, value);
+      }
+    });
+    const res = await updateProduct(id, data);
+    return { payload: { success: true, product: res.data } };
+  } catch (error) {
+    return { payload: { success: false, error: error?.response?.data?.message || error.message } };
+  }
+};
+
+// Delete product
+export const deleteProduct = (id) => async (dispatch) => {
+  try {
+    await deleteProductApi(id);
+    return { payload: { success: true } };
+  } catch (error) {
+    return { payload: { success: false, error: error?.response?.data?.message || error.message } };
+  }
+};
+
+// Fetch all products
+export const fetchAllProducts = (params) => async (dispatch) => {
+  try {
+    const res = await fetchProducts(params);
+    dispatch({ type: "FETCH_ALL_PRODUCTS", payload: res.data.products });
+    return { payload: res.data.products };
+  } catch (error) {
+    dispatch({ type: "FETCH_ALL_PRODUCTS", payload: [] });
+    return { payload: [] };
+  }
+};
+
 
 export const adminProductsReducer = (
-  state = { productList: demoProducts },
+  state = { productList: [] },
   action,
-) => state;
+) => {
+  switch (action.type) {
+    case "FETCH_ALL_PRODUCTS":
+      return { ...state, productList: action.payload };
+    default:
+      return state;
+  }
+};
