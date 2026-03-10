@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog } from "../ui/dialog";
@@ -29,16 +30,18 @@ function ShoppingOrders() {
   const { user } = useAuth();
   const orderList = useSelector((state) => state.shoppingOrderSlice.orderList);
   const orderDetails = selectedOrderDetails;
+  const navigate = useNavigate();
 
+  // Redirect immediately if not authenticated
   useEffect(() => {
-    // console.log('User from AuthContext:', user);
-    if (user && user.token) {
-      // console.log('Dispatching getAllOrdersByUserId with token:', user.token);
-      dispatch(getAllOrdersByUserId(user.token));
-    } else {
-      // console.warn('No user or user.token found, not dispatching order fetch.');
+    if (!user) {
+      navigate('/login');
+      return;
     }
-  }, [dispatch, user]);
+    if (user && user.token) {
+      dispatch(getAllOrdersByUserId(user.token));
+    }
+  }, [dispatch, user, navigate]);
 
 
   function handleFetchOrderDetails(getId) {

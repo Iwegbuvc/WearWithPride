@@ -26,6 +26,13 @@ const CheckOut = () => {
   const { user } = useAuth();
   const userEmail = user?.email || "user@example.com";
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
   // Fetch cart from backend on mount
   useEffect(() => {
     async function fetchCart() {

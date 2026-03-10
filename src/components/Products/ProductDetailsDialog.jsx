@@ -7,6 +7,7 @@ import {
   getPublicImagePath,
   DialogTitle,
   DialogDescription,
+  DialogHeader,
 } from "../ui/dialog";
 import { Separator } from "../Common/Separator";
 import { Input } from "../ui/input";
@@ -119,12 +120,14 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className={productDetails ? "max-w-xl w-full rounded-2xl shadow-2xl p-0 overflow-hidden bg-white" : undefined}>
-        <DialogTitle>
-          {productDetails?.title || productDetails?.name || "Product Details"}
-        </DialogTitle>
-        <DialogDescription>
-          {productDetails?.description?.slice(0, 80) || "Product information and reviews."}
-        </DialogDescription>
+        <DialogHeader>
+          <DialogTitle>
+            {productDetails?.title || productDetails?.name || "Product Details"}
+          </DialogTitle>
+          <DialogDescription>
+            {productDetails?.description?.slice(0, 80) || "Product information and reviews."}
+          </DialogDescription>
+        </DialogHeader>
         {productDetails ? (
           <>
             {/* Product Image and Thumbnails */}

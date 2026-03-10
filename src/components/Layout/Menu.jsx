@@ -152,7 +152,7 @@ const Menu = ({ onCartClick }) => {
               <button
                 onClick={() => {
                   logout();
-                  navigate('/login');
+                  navigate('/');
                 }}
                 className="flex items-center gap-1 px-2 py-1 rounded text-black font-bold text-xs md:text-sm lg:text-base xl:text-lg hover:text-red-500 bg-gray-100 hover:bg-red-200 transition"
                 title="Logout"
@@ -166,13 +166,19 @@ const Menu = ({ onCartClick }) => {
               </Link>
             )}
           </div>
-          <button
-            onClick={onCartClick}
-            className="relative focus:outline-none cursor-pointer"
-            aria-label="Open cart drawer"
-          >
-            <FaShoppingCart className="text-2xl text-black hover:text-red-500" />
-          </button>
+            <button
+              onClick={() => {
+                if (!user) {
+                  navigate('/login');
+                } else {
+                  onCartClick();
+                }
+              }}
+              className="relative focus:outline-none cursor-pointer"
+              aria-label="Open cart drawer"
+            >
+              <FaShoppingCart className="text-2xl text-black hover:text-red-500" />
+            </button>
         </div>
         {/* Hamburger for mobile/tablet at right end */}
         <button
@@ -297,7 +303,7 @@ const Menu = ({ onCartClick }) => {
                   onClick={() => {
                     setMobileOpen(false);
                     logout();
-                    navigate('/login');
+                    navigate('/');
                   }}
                   className="focus:outline-none cursor-pointer flex items-center gap-2 px-3 py-2 rounded text-black font-bold text-lg hover:text-red-500 bg-gray-100 hover:bg-red-200 no-underline"
                 >
@@ -317,7 +323,11 @@ const Menu = ({ onCartClick }) => {
               <button
                 onClick={() => {
                   setMobileOpen(false);
-                  if (onCartClick) onCartClick();
+                  if (!user) {
+                    navigate('/login');
+                  } else if (onCartClick) {
+                    onCartClick();
+                  }
                 }}
                 className="focus:outline-none cursor-pointer"
                 aria-label="Open cart drawer"

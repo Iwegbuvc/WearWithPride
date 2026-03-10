@@ -86,12 +86,8 @@ API.interceptors.response.use(
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // Optionally: clear tokens and redirect to login
         localStorage.removeItem("token");
-        // Prevent infinite reload loop if already on /login
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
-        }
+        // Do not forcibly redirect to /login here. Let route components handle auth.
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

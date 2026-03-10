@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import * as cartApi from "../api/cart";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 
@@ -11,12 +12,18 @@ export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
-  // Fetch cart on mount
+  // Fetch cart on mount only if user is logged in
   useEffect(() => {
-    fetchCart();
+    if (user) {
+      fetchCart();
+    } else {
+      setCartItems([]);
+      setTotal(0);
+    }
     // eslint-disable-next-line
-  }, []);
+  }, [user]);
 
   async function fetchCart() {
     setLoading(true);

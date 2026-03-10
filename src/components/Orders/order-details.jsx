@@ -68,9 +68,11 @@ function ShoppingOrderDetailsView({ orderDetails }) {
       )}
       <div className="flex items-center gap-3 mb-2">
         <FaBoxOpen className="text-red-500" size={28} />
-        <DialogTitle className="text-2xl font-extrabold tracking-tight">Order Details</DialogTitle>
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-extrabold tracking-tight">Order Details</DialogTitle>
+          <DialogDescription className="mb-6 text-gray-600">View and manage the details and status of this order. All order, payment, and shipping information is shown below.</DialogDescription>
+        </DialogHeader>
       </div>
-      <DialogDescription className="mb-6 text-gray-600">View and manage the details and status of this order. All order, payment, and shipping information is shown below.</DialogDescription>
       <div className="space-y-6">
         {/* Order Info */}
         <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4 border border-gray-100">

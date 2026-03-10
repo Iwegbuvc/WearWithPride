@@ -59,11 +59,13 @@ function AdminOrderDetailsView({ orderDetails }) {
 
   return (
     <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-white via-gray-50 to-blue-50 border border-blue-100 shadow-2xl rounded-2xl">
-      <DialogTitle as="h2">Order Details</DialogTitle>
-      <DialogDescription>
-        View and manage the details and status of this order. All order,
-        payment, and shipping information is shown below.
-      </DialogDescription>
+      <DialogHeader>
+        <DialogTitle as="h2">Order Details</DialogTitle>
+        <DialogDescription>
+          View and manage the details and status of this order. All order,
+          payment, and shipping information is shown below.
+        </DialogDescription>
+      </DialogHeader>
       <div className="grid gap-6">
         <div className="grid gap-2">
           <div className="flex mt-6 items-center justify-between">
